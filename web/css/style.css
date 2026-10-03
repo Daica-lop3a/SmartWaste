@@ -1,0 +1,357 @@
+/* SMARTWASTE - STYLE CHUNG TOAN APP */
+
+:root {
+    --green: #20a45a;
+    --green-dark: #123f2b;
+    --green-soft: #e9f8ef;
+    --green-pale: #f2fbf6;
+    --navy: #102b22;
+    --text: #1c2d26;
+    --muted: #718079;
+    --border: #e5eee9;
+    --orange: #ed7d3a;
+    --blue: #4387d8;
+    --purple: #8a72c8;
+    --white: #ffffff;
+    --page: #f7faf8;
+    --radius: 18px;
+    --shadow: 0 12px 35px rgba(26, 74, 51, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+html {
+    scroll-behavior: smooth;
+}
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+    background: var(--page);
+}
+a {
+    color: inherit;
+    text-decoration: none;
+}
+button, a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    padding: 25px 17px;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    color: #dcece4;
+    background: var(--navy);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 10px 28px;
+}
+.brand-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    color: var(--green);
+    background: #eaf8f0;
+    font-size: 23px;
+    font-weight: 800;
+}
+.brand-text {
+    font-size: 22px;
+    letter-spacing: -0.8px;
+    color: #fff;
+}
+.brand-text strong {
+    color: #fff;
+}
+.brand-text b {
+    color: #25b263;
+}
+.sidebar-section-title {
+    padding: 18px 13px 9px;
+    color: #779389;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+.side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.nav-item {
+    min-height: 45px;
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 11px;
+    color: #a8bdb4;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+.nav-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,.06);
+}
+.nav-item.active {
+    color: #fff;
+    background: #1e9e59;
+    box-shadow: 0 8px 20px rgba(23,154,83,.22);
+}
+.nav-icon {
+    width: 23px;
+    text-align: center;
+    font-size: 17px;
+}
+.sidebar-bottom {
+    margin-top: auto;
+}
+.eco-mini-card {
+    margin: 18px 3px;
+    padding: 13px;
+    display: flex;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 13px;
+    background: rgba(255,255,255,.045);
+}
+.eco-mini-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(36,174,94,.16);
+}
+.eco-mini-card strong, .eco-mini-card span {
+    display: block;
+}
+.eco-mini-card strong {
+    margin-bottom: 3px;
+    font-size: 11px;
+    color: #fff;
+}
+.eco-mini-card span {
+    color: #81978d;
+    font-size: 9px;
+    line-height: 1.35;
+}
+.logout-link {
+    min-height: 42px;
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-radius: 11px;
+    color: #8ea69b;
+    font-size: 13px;
+    font-weight: 600;
+}
+.logout-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,.05);
+}
+
+.main-content {
+    width: calc(100% - 250px);
+    margin-left: 250px;
+    padding: 28px 38px 35px;
+}
+.topbar {
+    min-height: 60px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.eyebrow, .panel-kicker {
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+.topbar h1 {
+    margin: 4px 0 0;
+    color: var(--green-dark);
+    font-size: 27px;
+    letter-spacing: -.8px;
+}
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.icon-button {
+    width: 42px;
+    height: 42px;
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: #527064;
+    background: #fff;
+    cursor: pointer;
+    font-size: 20px;
+}
+.notification-dot {
+    width: 7px;
+    height: 7px;
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: #ef7041;
+}
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.avatar {
+    width: 39px;
+    height: 39px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: #fff;
+    background: var(--green);
+    font-size: 14px;
+    font-weight: 800;
+}
+.profile-info strong, .profile-info span {
+    display: block;
+}
+.profile-info strong {
+    color: var(--green-dark);
+    font-size: 12px;
+}
+.profile-info span {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.btn {
+    min-height: 42px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border-radius: 11px;
+    font-size: 12px;
+    font-weight: 800;
+}
+.btn-primary {
+    color: #fff;
+    background: var(--green);
+    box-shadow: 0 10px 22px rgba(32,164,90,.2);
+}
+.btn-light {
+    color: var(--green-dark);
+    border: 1px solid #d4e4dc;
+    background: #fff;
+}
+
+.panel {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    box-shadow: 0 7px 22px rgba(31,75,53,.045);
+}
+.panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+.panel-header h3 {
+    margin: 4px 0 0;
+    color: var(--green-dark);
+    font-size: 17px;
+    letter-spacing: -.3px;
+}
+.text-link {
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.footer {
+    padding: 25px 3px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #9aa8a2;
+    font-size: 9px;
+}
+
+@media (max-width: 1100px) {
+    .sidebar {
+        width: 220px;
+    }
+    .main-content {
+        width: calc(100% - 220px);
+        margin-left: 220px;
+        padding: 24px;
+    }
+}
+@media (max-width: 820px) {
+    .sidebar {
+        width: 72px;
+        padding: 20px 9px;
+    }
+    .brand {
+        justify-content: center;
+        padding: 0 0 25px;
+    }
+    .brand-text, .sidebar-section-title, .nav-item span:not(.nav-icon), .eco-mini-card, .logout-link {
+        display: none;
+    }
+    .nav-item {
+        justify-content: center;
+        padding: 0;
+    }
+    .main-content {
+        width: calc(100% - 72px);
+        margin-left: 72px;
+    }
+}
+@media (max-width: 600px) {
+    .main-content {
+        padding: 17px;
+    }
+    .topbar {
+        align-items: flex-start;
+    }
+    .profile-info {
+        display: none;
+    }
+    .footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+}

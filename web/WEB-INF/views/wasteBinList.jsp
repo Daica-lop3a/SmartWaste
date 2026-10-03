@@ -25,289 +25,607 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
     <head>
 
         <meta charset="UTF-8">
 
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
         <title>Waste Bin Management</title>
 
-        <style>
+        <!-- CSS chung -->
+        <link rel="stylesheet"
+              href="<%=request.getContextPath()%>/css/style.css">
 
-            body {
-                font-family: Arial, sans-serif;
-                margin: 30px;
-                background: #f5f7fa;
-            }
-
-            h1 {
-                margin-bottom: 20px;
-            }
-
-            .top-bar {
-                margin-bottom: 20px;
-            }
-
-            .btn {
-                display: inline-block;
-                padding: 9px 14px;
-                margin-right: 6px;
-                text-decoration: none;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                background: #2563eb;
-                color: white;
-            }
-
-            .btn-secondary {
-                background: #6b7280;
-            }
-
-            .btn-danger {
-                background: #dc2626;
-            }
-
-            .role-info {
-                background: white;
-                padding: 10px;
-                margin-bottom: 15px;
-                border-radius: 5px;
-            }
-
-            .error {
-                color: #b91c1c;
-                margin-bottom: 15px;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                background: white;
-            }
-
-            th,
-            td {
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: left;
-            }
-
-            th {
-                background: #e5e7eb;
-            }
-
-            form {
-                display: inline;
-            }
-
-            .fill-green {
-                color: #15803d;
-                font-weight: bold;
-            }
-
-            .fill-yellow {
-                color: #ca8a04;
-                font-weight: bold;
-            }
-
-            .fill-red {
-                color: #dc2626;
-                font-weight: bold;
-            }
-
-        </style>
+        <!-- CSS rieng cho Waste Bin -->
+        <link rel="stylesheet"
+              href="<%=request.getContextPath()%>/css/wastebin.css">
 
     </head>
 
     <body>
 
-        <h1>Waste Bin Management</h1>
+        <div class="app-shell">
 
-        <div class="role-info">
+            <!-- Sidebar -->
+            <aside class="sidebar">
 
-            Logged in as:
+                <div class="brand">
 
-            <strong>
-                <%=currentUser != null
-                        ? currentUser.getFullName()
-                        : ""%>
-            </strong>
+                    <div class="brand-mark">
+                        SW
+                    </div>
 
-            |
+                    <div>
+                        <strong>SmartWaste</strong>
+                        <span>Management System</span>
+                    </div>
 
-            Role:
+                </div>
 
-            <strong>
-                <%=role%>
-            </strong>
+                <nav class="sidebar-nav">
 
-        </div>
+                    <a href="<%=request.getContextPath()%>/dashboard"
+                       class="nav-item">
+
+                        <span class="nav-icon">⌂</span>
+                        <span>Dashboard</span>
+
+                    </a>
+
+                    <a href="<%=request.getContextPath()%>/area"
+                       class="nav-item">
+
+                        <span class="nav-icon">⌖</span>
+                        <span>Area</span>
+
+                    </a>
+
+                    <a href="<%=request.getContextPath()%>/wastebin"
+                       class="nav-item active">
+
+                        <span class="nav-icon">▣</span>
+                        <span>Waste Bin</span>
+
+                    </a>
+
+                    <a href="<%=request.getContextPath()%>/collection"
+                       class="nav-item">
+
+                        <span class="nav-icon">↻</span>
+                        <span>Collection</span>
+
+                    </a>
+
+                    <a href="<%=request.getContextPath()%>/maintenance"
+                       class="nav-item">
+
+                        <span class="nav-icon">⚙</span>
+                        <span>Maintenance</span>
+
+                    </a>
+
+                    <a href="<%=request.getContextPath()%>/alert"
+                       class="nav-item">
+
+                        <span class="nav-icon">!</span>
+                        <span>Alert</span>
+
+                    </a>
+
+                </nav>
+
+                <div class="sidebar-bottom">
+
+                    <div class="eco-mini-card">
+
+                        <div class="eco-mini-icon">
+                            ♻
+                        </div>
+
+                        <div>
+                            <strong>Smart Waste</strong>
+                            <span>Cleaner city, smarter future.</span>
+                        </div>
+
+                    </div>
+
+                    <a href="<%=request.getContextPath()%>/logout"
+                       class="logout-link">
+
+                        <span>↪</span>
+                        Logout
+
+                    </a>
+
+                </div>
+
+            </aside>
 
 
-        <div class="top-bar">
+            <!-- Main content -->
+            <main class="main-content">
 
-            <% if (canManage) {%>
+                <!-- Topbar -->
+                <header class="topbar">
 
-            <a class="btn"
-               href="<%=request.getContextPath()%>/wastebin/create">
-                Add Waste Bin
-            </a>
+                    <div>
 
-            <% }%>
+                        <div class="eyebrow">
+                            SMARTWASTE MANAGEMENT
+                        </div>
 
+                        <h1>Waste Bin Management</h1>
 
-            <a class="btn btn-secondary"
-               href="<%=request.getContextPath()%>/dashboard">
-                Dashboard
-            </a>
+                    </div>
 
-        </div>
+                    <div class="topbar-actions">
 
+                        <div class="profile">
 
-        <% if (error != null) {%>
+                            <div class="avatar">
+                                <%=currentUser != null
+                                        && currentUser.getFullName() != null
+                                        && !currentUser.getFullName().isEmpty()
+                                        ? currentUser.getFullName().substring(0, 1).toUpperCase()
+                                        : "U"%>
+                            </div>
 
-        <div class="error">
-            <%=error%>
-        </div>
+                            <div class="profile-info">
 
-        <% } %>
+                                <strong>
+                                    <%=currentUser != null
+                                            ? currentUser.getFullName()
+                                            : ""%>
+                                </strong>
 
+                                <span>
+                                    <%=role%>
+                                </span>
 
-        <table>
+                            </div>
 
-            <thead>
+                        </div>
 
-                <tr>
+                    </div>
 
-                    <th>Bin ID</th>
-
-                    <th>Bin Code</th>
-
-                    <th>Location</th>
-
-                    <th>Capacity</th>
-
-                    <th>Current Fill</th>
-
-                    <th>Status</th>
-
-                    <th>Area</th>
-
-                    <th>Action</th>
-
-                </tr>
-
-            </thead>
+                </header>
 
 
-            <tbody>
+                <!-- Page intro -->
+                <section class="page-intro">
 
-                <%
-                    if (list != null && !list.isEmpty()) {
+                    <div>
 
-                        for (WasteBin bin : list) {
+                        <span class="section-kicker">
+                            WASTE BIN MONITORING
+                        </span>
 
-                            double fill = bin.getCurrentFill();
+                        <h2>
+                            Monitor and manage waste bins
+                        </h2>
 
-                            String fillClass = "fill-green";
+                        <p>
+                            Track bin capacity, location, status and current
+                            fill level across the waste management system.
+                        </p>
 
-                            if (fill >= 80) {
-                                fillClass = "fill-red";
-                            } else if (fill >= 50) {
-                                fillClass = "fill-yellow";
-                            }
-                %>
+                    </div>
 
-                <tr>
-
-                    <td>
-                        <%=bin.getBinID()%>
-                    </td>
-
-                    <td>
-                        <%=bin.getBinCode()%>
-                    </td>
-
-                    <td>
-                        <%=bin.getLocation()%>
-                    </td>
-
-                    <td>
-                        <%=bin.getCapacity()%>
-                    </td>
-
-                    <td class="<%=fillClass%>">
-                        <%=fill%>%
-                    </td>
-
-                    <td>
-                        <%=bin.getStatus()%>
-                    </td>
-
-                    <td>
-                        <%=bin.getAreaID()%>
-                    </td>
-
-                    <td>
-
-                        <a class="btn btn-secondary"
-                           href="<%=request.getContextPath()%>/wastebin/view?id=<%=bin.getBinID()%>">
-                            View
-                        </a>
-
+                    <div class="page-actions">
 
                         <% if (canManage) {%>
 
-                        <a class="btn"
-                           href="<%=request.getContextPath()%>/wastebin/edit?id=<%=bin.getBinID()%>">
-                            Edit
+                        <a class="btn btn-primary"
+                           href="<%=request.getContextPath()%>/wastebin/create">
+
+                            <span>+</span>
+                            Add Waste Bin
+
                         </a>
 
+                        <% }%>
 
-                        <form action="<%=request.getContextPath()%>/wastebin/delete"
-                              method="POST"
-                              onsubmit="return confirm('Are you sure you want to delete this waste bin?');">
+                        <a class="btn btn-light"
+                           href="<%=request.getContextPath()%>/dashboard">
 
-                            <input type="hidden"
-                                   name="id"
-                                   value="<%=bin.getBinID()%>">
+                            Dashboard
 
-                            <button type="submit"
-                                    class="btn btn-danger">
-                                Delete
-                            </button>
+                        </a>
 
-                        </form>
+                    </div>
 
-                        <% } %>
+                </section>
 
-                    </td>
 
-                </tr>
+                <!-- Error -->
+                <% if (error != null) {%>
 
-                <%
-                    }
+                <div class="alert-error">
 
-                } else {
-                %>
+                    <span class="alert-error-icon">!</span>
 
-                <tr>
+                    <span>
+                        <%=error%>
+                    </span>
 
-                    <td colspan="8">
-                        No waste bins found.
-                    </td>
+                </div>
 
-                </tr>
+                <% }%>
 
-                <%
-                    }
-                %>
 
-            </tbody>
+                <!-- Summary -->
+                <section class="bin-summary">
 
-        </table>
+                    <div class="summary-card">
+
+                        <div class="summary-icon summary-icon-total">
+                            ▣
+                        </div>
+
+                        <div>
+
+                            <span>Total Bins</span>
+
+                            <strong>
+                                <%=list != null ? list.size() : 0%>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon summary-icon-active">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <span>Active</span>
+
+                            <strong>
+                                <%
+                                    int activeCount = 0;
+
+                                    if (list != null) {
+                                        for (WasteBin bin : list) {
+                                            if ("ACTIVE".equalsIgnoreCase(bin.getStatus())) {
+                                                activeCount++;
+                                            }
+                                        }
+                                    }
+                                %>
+
+                                <%=activeCount%>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon summary-icon-warning">
+                            !
+                        </div>
+
+                        <div>
+
+                            <span>High Fill</span>
+
+                            <strong>
+                                <%
+                                    int highFillCount = 0;
+
+                                    if (list != null) {
+                                        for (WasteBin bin : list) {
+                                            if (bin.getCurrentFill() >= 80) {
+                                                highFillCount++;
+                                            }
+                                        }
+                                    }
+                                %>
+
+                                <%=highFillCount%>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- Waste Bin table -->
+                <section class="panel bin-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <span class="panel-kicker">
+                                BIN INVENTORY
+                            </span>
+
+                            <h3>
+                                Waste Bin List
+                            </h3>
+
+                        </div>
+
+                        <span class="record-count">
+
+                            <%=list != null ? list.size() : 0%>
+                            records
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table class="data-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Bin ID</th>
+
+                                    <th>Bin Code</th>
+
+                                    <th>Location</th>
+
+                                    <th>Capacity</th>
+
+                                    <th>Current Fill</th>
+
+                                    <th>Status</th>
+
+                                    <th>Area</th>
+
+                                    <th>Action</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <%
+                                    if (list != null && !list.isEmpty()) {
+
+                                        for (WasteBin bin : list) {
+
+                                            double fill = bin.getCurrentFill();
+
+                                            String fillClass = "fill-green";
+
+                                            String fillLabel = "Normal";
+
+                                            if (fill >= 80) {
+
+                                                fillClass = "fill-red";
+                                                fillLabel = "High";
+
+                                            } else if (fill >= 50) {
+
+                                                fillClass = "fill-yellow";
+                                                fillLabel = "Medium";
+                                            }
+                                %>
+
+                                <tr>
+
+                                    <td>
+                                        <span class="bin-id">
+                                            #<%=bin.getBinID()%>
+                                        </span>
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="bin-code">
+                                            <%=bin.getBinCode()%>
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="location-cell">
+
+                                            <span class="location-icon">
+                                                ⌖
+                                            </span>
+
+                                            <span>
+                                                <%=bin.getLocation()%>
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="capacity-value">
+                                            <%=bin.getCapacity()%>
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="fill-cell">
+
+                                            <div class="fill-info">
+
+                                                <strong class="<%=fillClass%>">
+                                                    <%=fill%>%
+                                                </strong>
+
+                                                <span class="<%=fillClass%>">
+                                                    <%=fillLabel%>
+                                                </span>
+
+                                            </div>
+
+                                            <div class="fill-bar">
+
+                                                <div class="fill-progress <%=fillClass%>"
+                                                     style="width: <%=Math.min(fill, 100)%>%;">
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="status-badge">
+
+                                            <span class="status-dot"></span>
+
+                                            <%=bin.getStatus()%>
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="area-badge">
+                                            Area <%=bin.getAreaID()%>
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="action-group">
+
+                                            <a class="action-btn action-view"
+                                               href="<%=request.getContextPath()%>/wastebin/view?id=<%=bin.getBinID()%>">
+
+                                                View
+
+                                            </a>
+
+
+                                            <% if (canManage) {%>
+
+                                            <a class="action-btn action-edit"
+                                               href="<%=request.getContextPath()%>/wastebin/edit?id=<%=bin.getBinID()%>">
+
+                                                Edit
+
+                                            </a>
+
+
+                                            <form action="<%=request.getContextPath()%>/wastebin/delete"
+                                                  method="POST"
+                                                  onsubmit="return confirm('Are you sure you want to delete this waste bin?');">
+
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="<%=bin.getBinID()%>">
+
+                                                <button type="submit"
+                                                        class="action-btn action-delete">
+
+                                                    Delete
+
+                                                </button>
+
+                                            </form>
+
+                                            <% } %>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                                <%
+                                    }
+
+                                } else {
+                                %>
+
+                                <tr>
+
+                                    <td colspan="8">
+
+                                        <div class="empty-state">
+
+                                            <div class="empty-icon">
+                                                ▣
+                                            </div>
+
+                                            <strong>
+                                                No waste bins found
+                                            </strong>
+
+                                            <span>
+                                                There are currently no waste
+                                                bins available in the system.
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                                <%
+                                    }
+                                %>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+
+                <footer class="footer">
+
+                    <span>
+                        SmartWaste Management System
+                    </span>
+
+                    <span>
+                        Waste Bin Monitoring
+                    </span>
+
+                </footer>
+
+            </main>
+
+        </div>
 
     </body>
 

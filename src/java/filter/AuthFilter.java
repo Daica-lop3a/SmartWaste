@@ -23,7 +23,7 @@ import model.AppUser;
 public class AuthFilter implements Filter {
 
     /**
-     * Các URL không cần đăng nhập.
+     * Cac URL khong can dang nhap.
      */
     private static final Set<String> PUBLIC_PREFIX
             = new HashSet<String>(Arrays.asList(
@@ -35,9 +35,12 @@ public class AuthFilter implements Filter {
             ));
 
     /**
-     * URL -> các role được phép truy cập.
+     * URL -> cac role duoc phep truy cap.
      *
-     * ADM = Administrator MGR = Manager STF = Staff TEC = Technician
+     * ADM = Administrator
+     * MGR = Manager
+     * STF = Staff
+     * TEC = Technician
      */
     private static final Map<String, Set<String>> ACCESS
             = new LinkedHashMap<String, Set<String>>();
@@ -68,13 +71,13 @@ public class AuthFilter implements Filter {
 
         // AREA
         ACCESS.put("/area/save",
-                roles("ADM"));
+                roles("ADM", "MGR"));
         ACCESS.put("/area/delete",
-                roles("ADM"));
+                roles("ADM", "MGR"));
         ACCESS.put("/area/create",
-                roles("ADM"));
+                roles("ADM", "MGR"));
         ACCESS.put("/area/edit",
-                roles("ADM"));
+                roles("ADM", "MGR"));
         ACCESS.put("/area/view",
                 roles("ADM", "MGR", "STF", "TEC"));
         ACCESS.put("/area",
@@ -106,9 +109,9 @@ public class AuthFilter implements Filter {
         ACCESS.put("/collection/edit",
                 roles("ADM", "MGR", "STF"));
         ACCESS.put("/collection/view",
-                roles("ADM", "MGR", "STF"));
+                roles("ADM", "MGR", "STF", "TEC"));
         ACCESS.put("/collection",
-                roles("ADM", "MGR", "STF"));
+                roles("ADM", "MGR", "STF", "TEC"));
 
         // MAINTENANCE
         ACCESS.put("/maintenance/save",
@@ -116,11 +119,11 @@ public class AuthFilter implements Filter {
         ACCESS.put("/maintenance/delete",
                 roles("ADM", "MGR"));
         ACCESS.put("/maintenance/create",
-                roles("ADM", "MGR"));
+                roles("ADM", "MGR", "TEC"));
         ACCESS.put("/maintenance/edit",
                 roles("ADM", "MGR", "TEC"));
         ACCESS.put("/maintenance",
-                roles("ADM", "MGR", "TEC"));
+                roles("ADM", "MGR", "STF", "TEC"));
 
         // ALERT
         ACCESS.put("/alert/save",
@@ -148,7 +151,7 @@ public class AuthFilter implements Filter {
     }
 
     /**
-     * Tạo Set role.
+     * Tao Set role.
      */
     private static Set<String> roles(String... values) {
         return new HashSet<String>(Arrays.asList(values));
@@ -182,9 +185,9 @@ public class AuthFilter implements Filter {
          * LANDING PAGE
          * =========================================================
          *
-         * "/" và "/index.jsp" là public.
+         * "/" va "/index.jsp" la public.
          *
-         * Không yêu cầu đăng nhập để xem Landing Page.
+         * Khong yeu cau dang nhap de xem Landing Page.
          */
         if ("/".equals(path)
                 || "/index.jsp".equals(path)) {
@@ -198,7 +201,7 @@ public class AuthFilter implements Filter {
          * PUBLIC URL
          * =========================================================
          *
-         * Những URL này không cần login.
+         * Nhung URL nay khong can login.
          */
         for (String p : PUBLIC_PREFIX) {
 
@@ -211,7 +214,7 @@ public class AuthFilter implements Filter {
 
         /*
          * =========================================================
-         * LẤY USER TỪ SESSION
+         * LAY USER TU SESSION
          * =========================================================
          */
         AppUser me = null;
@@ -224,7 +227,7 @@ public class AuthFilter implements Filter {
 
         /*
          * =========================================================
-         * CHƯA ĐĂNG NHẬP
+         * CHUA DANG NHAP
          * =========================================================
          */
         if (me == null) {
@@ -235,7 +238,7 @@ public class AuthFilter implements Filter {
 
         /*
          * =========================================================
-         * KIỂM TRA QUYỀN THEO URL
+         * KIEM TRA QUYEN THEO URL
          * =========================================================
          */
         for (Map.Entry<String, Set<String>> entry
@@ -270,7 +273,7 @@ public class AuthFilter implements Filter {
 
         /*
          * =========================================================
-         * CHO PHÉP REQUEST ĐI TIẾP
+         * CHO PHEP REQUEST DI TIEP
          * =========================================================
          */
         chain.doFilter(rq, rp);
