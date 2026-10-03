@@ -69,64 +69,73 @@ public class AuthFilter implements Filter {
         // AREA
         ACCESS.put("/area/save",
                 roles("ADM"));
-
         ACCESS.put("/area/delete",
                 roles("ADM"));
-
         ACCESS.put("/area/create",
                 roles("ADM"));
-
         ACCESS.put("/area/edit",
                 roles("ADM"));
-
         ACCESS.put("/area/view",
                 roles("ADM", "MGR", "STF", "TEC"));
-
         ACCESS.put("/area",
                 roles("ADM", "MGR", "STF", "TEC"));
 
         // WASTE BIN
-        ACCESS.put("/wastebin/save", roles("ADM", "MGR", "TEC"));
-        ACCESS.put("/wastebin/delete", roles("ADM", "MGR", "TEC"));
-        ACCESS.put("/wastebin/create", roles("ADM", "MGR", "TEC"));
-        ACCESS.put("/wastebin/edit", roles("ADM", "MGR", "TEC"));
-        ACCESS.put("/wastebin/view", roles("ADM", "MGR", "STF", "TEC"));
-        ACCESS.put("/wastebin", roles("ADM", "MGR", "STF", "TEC"));
+        ACCESS.put("/wastebin/save",
+                roles("ADM", "MGR", "TEC"));
+        ACCESS.put("/wastebin/delete",
+                roles("ADM", "MGR", "TEC"));
+        ACCESS.put("/wastebin/create",
+                roles("ADM", "MGR", "TEC"));
+        ACCESS.put("/wastebin/edit",
+                roles("ADM", "MGR", "TEC"));
+        ACCESS.put("/wastebin/view",
+                roles("ADM", "MGR", "STF", "TEC"));
+        ACCESS.put("/wastebin",
+                roles("ADM", "MGR", "STF", "TEC"));
 
         // COLLECTION
         ACCESS.put("/collection/staff-by-bin",
                 roles("ADM", "MGR"));
         ACCESS.put("/collection/save",
                 roles("ADM", "MGR", "STF"));
-
         ACCESS.put("/collection/delete",
                 roles("ADM", "MGR"));
-
         ACCESS.put("/collection/create",
                 roles("ADM", "MGR"));
-
         ACCESS.put("/collection/edit",
                 roles("ADM", "MGR", "STF"));
-
         ACCESS.put("/collection/view",
                 roles("ADM", "MGR", "STF"));
-
         ACCESS.put("/collection",
                 roles("ADM", "MGR", "STF"));
 
         // MAINTENANCE
-        ACCESS.put("/maintenance/save", roles("ADM", "MGR", "TEC"));
-        ACCESS.put("/maintenance/delete", roles("ADM", "MGR"));
-        ACCESS.put("/maintenance/create", roles("ADM", "MGR"));
-        ACCESS.put("/maintenance/edit", roles("ADM", "MGR", "TEC"));
-        ACCESS.put("/maintenance", roles("ADM", "MGR", "TEC"));
+        ACCESS.put("/maintenance/save",
+                roles("ADM", "MGR", "TEC"));
+        ACCESS.put("/maintenance/delete",
+                roles("ADM", "MGR"));
+        ACCESS.put("/maintenance/create",
+                roles("ADM", "MGR"));
+        ACCESS.put("/maintenance/edit",
+                roles("ADM", "MGR", "TEC"));
+        ACCESS.put("/maintenance",
+                roles("ADM", "MGR", "TEC"));
+
         // ALERT
-        ACCESS.put("/alert/save", roles("ADM", "MGR"));
-        ACCESS.put("/alert/delete", roles("ADM", "MGR"));
-        ACCESS.put("/alert/create", roles("ADM", "MGR"));
-        ACCESS.put("/alert/edit", roles("ADM", "MGR"));
-        ACCESS.put("/alert/resolve", roles("ADM", "MGR"));
-        ACCESS.put("/alert", roles("ADM", "MGR", "STF", "TEC"));
+        ACCESS.put("/alert/save",
+                roles("ADM", "MGR"));
+        ACCESS.put("/alert/delete",
+                roles("ADM", "MGR"));
+        ACCESS.put("/alert/create",
+                roles("ADM", "MGR"));
+        ACCESS.put("/alert/edit",
+                roles("ADM", "MGR"));
+        ACCESS.put("/alert/resolve",
+                roles("ADM", "MGR"));
+        ACCESS.put("/alert",
+                roles("ADM", "MGR", "STF", "TEC"));
+
         // REPORT
         ACCESS.put("/report",
                 roles("ADM", "MGR"));
@@ -169,49 +178,73 @@ public class AuthFilter implements Filter {
         }
 
         /*
-         * Những URL public không cần login.
+         * =========================================================
+         * LANDING PAGE
+         * =========================================================
+         *
+         * "/" và "/index.jsp" là public.
+         *
+         * Không yêu cầu đăng nhập để xem Landing Page.
+         */
+        if ("/".equals(path)
+                || "/index.jsp".equals(path)) {
+
+            chain.doFilter(rq, rp);
+            return;
+        }
+
+        /*
+         * =========================================================
+         * PUBLIC URL
+         * =========================================================
+         *
+         * Những URL này không cần login.
          */
         for (String p : PUBLIC_PREFIX) {
+
             if (path.startsWith(p)) {
+
                 chain.doFilter(rq, rp);
                 return;
             }
         }
 
         /*
-         * Lấy user từ session.
+         * =========================================================
+         * LẤY USER TỪ SESSION
+         * =========================================================
          */
         AppUser me = null;
 
         if (req.getSession(false) != null) {
+
             me = (AppUser) req.getSession(false)
                     .getAttribute("user");
         }
 
         /*
-         * Chưa đăng nhập.
+         * =========================================================
+         * CHƯA ĐĂNG NHẬP
+         * =========================================================
          */
         if (me == null) {
+
             resp.sendRedirect(ctx + "/login");
             return;
         }
 
         /*
-         * Nếu truy cập root "/" thì chuyển dashboard.
-         */
-        if ("/".equals(path)) {
-            resp.sendRedirect(ctx + "/dashboard");
-            return;
-        }
-
-        /*
-         * Kiểm tra quyền theo URL.
+         * =========================================================
+         * KIỂM TRA QUYỀN THEO URL
+         * =========================================================
          */
         for (Map.Entry<String, Set<String>> entry
                 : ACCESS.entrySet()) {
 
             String url = entry.getKey();
-            Set<String> allowedRoles = entry.getValue();
+
+            Set<String> allowedRoles
+                    = entry.getValue();
 
             if (path.startsWith(url)) {
 
@@ -235,6 +268,11 @@ public class AuthFilter implements Filter {
             }
         }
 
+        /*
+         * =========================================================
+         * CHO PHÉP REQUEST ĐI TIẾP
+         * =========================================================
+         */
         chain.doFilter(rq, rp);
     }
 

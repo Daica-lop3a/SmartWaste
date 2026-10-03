@@ -1,906 +1,444 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="model.AppUser"%>
-<%@page import="model.WasteBin"%>
-<%@page import="java.util.List"%>
-
 <%
-    AppUser currentUser
-            = (AppUser) session.getAttribute("user");
+    String ctx = request.getContextPath();
 
-    String currentRole
-            = currentUser != null
-                    ? currentUser.getRoleId()
-                    : "";
+    Object userObj = session.getAttribute("user");
+    String displayName = "Administrator";
+
+    if (userObj != null) {
+        try {
+            Object name = userObj.getClass().getMethod("getFullName").invoke(userObj);
+            if (name != null && !name.toString().trim().isEmpty()) {
+                displayName = name.toString();
+            }
+        } catch (Exception ignored) {
+            // Keep the fallback name when AppUser does not expose getFullName().
+        }
+    }
+
+    Object totalBinsObj = request.getAttribute("totalBins");
+    Object totalCollectionsObj = request.getAttribute("totalCollections");
+    Object totalAlertsObj = request.getAttribute("totalAlerts");
+    Object totalAreasObj = request.getAttribute("totalAreas");
+
+    String totalBins = totalBinsObj != null ? totalBinsObj.toString() : "—";
+    String totalCollections = totalCollectionsObj != null ? totalCollectionsObj.toString() : "—";
+    String totalAlerts = totalAlertsObj != null ? totalAlertsObj.toString() : "—";
+    String totalAreas = totalAreasObj != null ? totalAreasObj.toString() : "—";
 %>
 
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
     <head>
-
         <meta charset="UTF-8">
-
-        <title>SmartWaste Dashboard</title>
-
-        <style>
-
-            * {
-                box-sizing: border-box;
-            }
-
-            body {
-                margin: 0;
-                font-family: Arial, sans-serif;
-                background-color: #f5f7fa;
-                color: #333;
-            }
-
-            /* ========================= */
-            /* HEADER */
-            /* ========================= */
-
-            .header {
-                background-color: #1f2937;
-                color: white;
-                padding: 20px 30px;
-            }
-
-            .header h1 {
-                margin: 0;
-                font-size: 28px;
-            }
-
-            .header p {
-                margin: 5px 0 0;
-                color: #d1d5db;
-            }
-
-            .user-info {
-                float: right;
-                margin-right: 10px;
-                margin-top: 8px;
-                color: #d1d5db;
-                font-size: 14px;
-            }
-
-            .logout {
-                float: right;
-                color: white;
-                text-decoration: none;
-                background-color: #dc2626;
-                padding: 8px 15px;
-                border-radius: 5px;
-            }
-
-            .logout:hover {
-                background-color: #b91c1c;
-            }
-
-            /* ========================= */
-            /* CONTAINER */
-            /* ========================= */
-
-            .container {
-                padding: 30px;
-            }
-
-            .section-title {
-                margin: 30px 0 15px;
-                font-size: 22px;
-            }
-
-            /* ========================= */
-            /* CARDS */
-            /* ========================= */
-
-            .cards {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 20px;
-            }
-
-            .card {
-                background-color: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            }
-
-            .card-title {
-                font-size: 15px;
-                color: #6b7280;
-                margin-bottom: 10px;
-            }
-
-            .card-value {
-                font-size: 30px;
-                font-weight: bold;
-            }
-
-            /* ========================= */
-            /* CARD COLORS */
-            /* ========================= */
-
-            .blue {
-                border-left: 5px solid #2563eb;
-            }
-
-            .green {
-                border-left: 5px solid #16a34a;
-            }
-
-            .yellow {
-                border-left: 5px solid #eab308;
-            }
-
-            .red {
-                border-left: 5px solid #dc2626;
-            }
-
-            .orange {
-                border-left: 5px solid #f97316;
-            }
-
-            .gray {
-                border-left: 5px solid #6b7280;
-            }
-
-            /* ========================= */
-            /* QUICK ACCESS */
-            /* ========================= */
-
-            .quick-access {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 15px;
-                margin-bottom: 30px;
-            }
-
-            .quick-btn {
-                display: block;
-                padding: 18px;
-                color: white;
-                text-decoration: none;
-                text-align: center;
-                border-radius: 8px;
-                font-weight: bold;
-                transition: 0.2s;
-            }
-
-            .quick-btn:hover {
-                opacity: 0.85;
-                transform: translateY(-2px);
-            }
-
-            .btn-user {
-                background-color: #374151;
-            }
-
-            .btn-area {
-                background-color: #6b7280;
-            }
-
-            .btn-bin {
-                background-color: #2563eb;
-            }
-
-            .btn-collection {
-                background-color: #16a34a;
-            }
-
-            .btn-alert {
-                background-color: #dc2626;
-            }
-
-            .btn-maintenance {
-                background-color: #f97316;
-            }
-
-            /* ========================= */
-            /* BIN MONITORING */
-            /* ========================= */
-
-            .bin-card {
-                min-height: 250px;
-            }
-
-            .bin-bar-container {
-                margin-top: 10px;
-                background-color: #e5e7eb;
-                height: 12px;
-                border-radius: 6px;
-                overflow: hidden;
-            }
-
-            .bin-bar {
-                height: 100%;
-                background-color: #2563eb;
-            }
-
-            .bin-info {
-                margin-top: 10px;
-            }
-
-            .bin-detail-btn {
-                display: inline-block;
-                margin-top: 10px;
-                padding: 8px 14px;
-                background-color: #2563eb;
-                color: white;
-                text-decoration: none;
-                border-radius: 6px;
-            }
-
-            .bin-detail-btn:hover {
-                background-color: #1d4ed8;
-            }
-
-            /* ========================= */
-            /* MAINTENANCE SUMMARY */
-            /* ========================= */
-
-            .maintenance-summary {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 20px;
-            }
-
-            /* ========================= */
-            /* RESPONSIVE */
-            /* ========================= */
-
-            @media (max-width: 1100px) {
-
-                .cards {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-
-                .quick-access {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-
-                .maintenance-summary {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-            }
-
-            @media (max-width: 600px) {
-
-                .cards {
-                    grid-template-columns: 1fr;
-                }
-
-                .quick-access {
-                    grid-template-columns: 1fr;
-                }
-
-                .maintenance-summary {
-                    grid-template-columns: 1fr;
-                }
-
-                .container {
-                    padding: 15px;
-                }
-
-                .header {
-                    padding: 20px;
-                }
-
-                .user-info {
-                    display: none;
-                }
-            }
-
-        </style>
-
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SmartWaste - Dashboard</title>
+        <link rel="stylesheet" href="<%= ctx%>/css/dashboard.css">
     </head>
 
     <body>
 
-        <!-- ===================================================== -->
-        <!-- HEADER -->
-        <!-- ===================================================== -->
+        <div class="app-shell">
 
-        <div class="header">
+            <!-- SIDEBAR -->
+            <aside class="sidebar">
 
-            <a class="logout"
-               href="<%= request.getContextPath()%>/logout">
-                Logout
-            </a>
-
-            <div class="user-info">
-                Role:
-                <strong><%=currentRole%></strong>
-            </div>
-
-            <h1>SmartWaste Dashboard</h1>
-
-            <p>
-                Smart Waste Management System
-            </p>
-
-        </div>
-
-
-        <div class="container">
-
-
-            <!-- ================================================= -->
-            <!-- QUICK ACCESS -->
-            <!-- ================================================= -->
-
-            <h2 class="section-title">
-                Quick Access
-            </h2>
-
-            <div class="quick-access">
-
-                <!-- ========================= -->
-                <!-- USER MANAGEMENT -->
-                <!-- ADM ONLY -->
-                <!-- ========================= -->
-
-                <% if ("ADM".equals(currentRole)) {%>
-
-                <a class="quick-btn btn-user"
-                   href="<%=request.getContextPath()%>/user">
-
-                    User Management
-
+                <a href="<%= ctx%>/dashboard" class="brand">
+                    <span class="brand-icon">♻</span>
+                    <span class="brand-text">
+                        <strong>Smart</strong><b>Waste</b>
+                    </span>
                 </a>
 
-                <% } %>
+                <div class="sidebar-section-title">MAIN MENU</div>
 
+                <nav class="side-nav">
 
-                <!-- ========================= -->
-                <!-- AREA -->
-                <!-- ADM / MGR -->
-                <!-- ========================= -->
+                    <a class="nav-item active" href="<%= ctx%>/dashboard">
+                        <span class="nav-icon">⌂</span>
+                        <span>Dashboard</span>
+                    </a>
 
-                <% if ("ADM".equals(currentRole)
-                    || "MGR".equals(currentRole)) {%>
+                    <a class="nav-item" href="<%= ctx%>/area">
+                        <span class="nav-icon">⌖</span>
+                        <span>Areas</span>
+                    </a>
 
-                <a class="quick-btn btn-area"
-                   href="<%=request.getContextPath()%>/area">
+                    <a class="nav-item" href="<%= ctx%>/wastebin">
+                        <span class="nav-icon">▣</span>
+                        <span>Waste Bins</span>
+                    </a>
 
-                    Areas
+                    <a class="nav-item" href="<%= ctx%>/collection">
+                        <span class="nav-icon">↻</span>
+                        <span>Collections</span>
+                    </a>
 
-                </a>
+                    <a class="nav-item" href="<%= ctx%>/alert">
+                        <span class="nav-icon">!</span>
+                        <span>Alerts</span>
+                    </a>
 
-                <% }%>
+                    <a class="nav-item" href="<%= ctx%>/maintenance">
+                        <span class="nav-icon">⚙</span>
+                        <span>Maintenance</span>
+                    </a>
 
+                    <div class="sidebar-section-title">MANAGEMENT</div>
 
-                <!-- ========================= -->
-                <!-- WASTE BIN -->
-                <!-- ALL ROLES -->
-                <!-- ========================= -->
+                    <a class="nav-item" href="<%= ctx%>/user">
+                        <span class="nav-icon">♙</span>
+                        <span>Users</span>
+                    </a>
 
-                <a class="quick-btn btn-bin"
-                   href="<%=request.getContextPath()%>/wastebin">
+                    <a class="nav-item" href="<%= ctx%>/report">
+                        <span class="nav-icon">▤</span>
+                        <span>Reports</span>
+                    </a>
 
-                    Waste Bins
+                </nav>
 
-                </a>
-
-
-                <!-- ========================= -->
-                <!-- COLLECTION -->
-                <!-- ADM / MGR / STF -->
-                <!-- ========================= -->
-
-                <% if ("ADM".equals(currentRole)
-                    || "MGR".equals(currentRole)
-                    || "STF".equals(currentRole)) {%>
-
-                <a class="quick-btn btn-collection"
-                   href="<%=request.getContextPath()%>/collection">
-
-                    Collection Requests
-
-                </a>
-
-                <% }%>
-
-
-                <!-- ========================= -->
-                <!-- ALERT -->
-                <!-- ALL ROLES -->
-                <!-- ========================= -->
-
-                <a class="quick-btn btn-alert"
-                   href="<%=request.getContextPath()%>/alert">
-
-                    Alerts
-
-                </a>
-
-
-                <!-- ========================= -->
-                <!-- MAINTENANCE -->
-                <!-- ADM / MGR / TEC -->
-                <!-- ========================= -->
-
-                <% if ("ADM".equals(currentRole)
-                    || "MGR".equals(currentRole)
-                    || "TEC".equals(currentRole)) {%>
-
-                <a class="quick-btn btn-maintenance"
-                   href="<%=request.getContextPath()%>/maintenance">
-
-                    Maintenance
-
-                </a>
-
-                <% }%>
-
-            </div>
-
-
-            <!-- ================================================= -->
-            <!-- WASTE BIN -->
-            <!-- ================================================= -->
-
-            <h2 class="section-title">
-                Waste Bins
-            </h2>
-
-            <div class="cards">
-
-                <div class="card blue">
-
-                    <div class="card-title">
-                        Total Bins
+                <div class="sidebar-bottom">
+                    <div class="eco-mini-card">
+                        <div class="eco-mini-icon">🌱</div>
+                        <div>
+                            <strong>Cleaner city</strong>
+                            <span>Smarter waste operations</span>
+                        </div>
                     </div>
 
-                    <div class="card-value">
-                        <%= request.getAttribute("totalBins")%>
-                    </div>
-
+                    <a class="logout-link" href="<%= ctx%>/logout">
+                        <span>↪</span>
+                        Logout
+                    </a>
                 </div>
+            </aside>
 
 
-                <div class="card green">
+            <!-- MAIN -->
+            <main class="main-content">
 
-                    <div class="card-title">
-                        Active Bins
+                <!-- TOP BAR -->
+                <header class="topbar">
+
+                    <div>
+                        <span class="eyebrow">SMART WASTE MANAGEMENT</span>
+                        <h1>Dashboard</h1>
                     </div>
 
-                    <div class="card-value">
-                        <%= request.getAttribute("activeBins")%>
+                    <div class="topbar-actions">
+                        <button class="icon-button" type="button" aria-label="Notifications">
+                            ♢
+                            <span class="notification-dot"></span>
+                        </button>
+
+                        <div class="profile">
+                            <div class="avatar"><%= displayName.substring(0, 1).toUpperCase()%></div>
+                            <div class="profile-info">
+                                <strong><%= displayName%></strong>
+                                <span>System User</span>
+                            </div>
+                        </div>
                     </div>
 
-                </div>
+                </header>
 
 
-                <div class="card red">
+                <!-- HERO -->
+                <section class="hero">
 
-                    <div class="card-title">
-                        Full Bins
+                    <div class="hero-copy">
+                        <span class="hero-pill">♻ Smart • Clean • Connected</span>
+
+                        <h2>
+                            Smarter waste.<br>
+                            <span>Cleaner city.</span>
+                        </h2>
+
+                        <p>
+                            Manage waste bins, collection activities and alerts
+                            from one centralized platform.
+                        </p>
+
+                        <div class="hero-actions">
+                            <a href="<%= ctx%>/wastebin" class="btn btn-primary">
+                                View Waste Bins <span>→</span>
+                            </a>
+
+                            <a href="<%= ctx%>/collection/create" class="btn btn-light">
+                                New Collection
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="card-value">
-                        <%= request.getAttribute("fullBins")%>
-                    </div>
+                    <div class="hero-visual">
 
-                </div>
+                        <div class="orbit orbit-one"></div>
+                        <div class="orbit orbit-two"></div>
 
+                        <div class="city-shape">
+                            <span class="building b1"></span>
+                            <span class="building b2"></span>
+                            <span class="building b3"></span>
+                            <span class="building b4"></span>
+                            <span class="tree t1">♣</span>
+                            <span class="tree t2">♣</span>
+                            <span class="smart-bin">♻</span>
+                        </div>
 
-                <div class="card gray">
+                        <div class="floating-card">
+                            <div class="floating-card-head">
+                                <strong>Smart Monitoring</strong>
+                                <span class="status-live">LIVE</span>
+                            </div>
 
-                    <div class="card-title">
-                        Maintenance
-                    </div>
+                            <div class="monitor-row">
+                                <span class="monitor-icon">▣</span>
+                                <div>
+                                    <strong>Waste Bins</strong>
+                                    <small>Connected management</small>
+                                </div>
+                                <b><%= totalBins%></b>
+                            </div>
 
-                    <div class="card-value">
-                        <%= request.getAttribute("maintenanceBins")%>
-                    </div>
+                            <div class="monitor-line"></div>
 
-                </div>
-
-            </div>
-
-
-            <!-- ================================================= -->
-            <!-- LIVE WASTE BIN MONITORING -->
-            <!-- ================================================= -->
-
-            <h2 class="section-title">
-                Live Waste Bin Monitoring
-            </h2>
-
-            <div class="cards">
-
-                <%
-                    List<WasteBin> binList
-                            = (List<WasteBin>) request.getAttribute("LIST_BIN");
-
-                    if (binList != null
-                            && !binList.isEmpty()) {
-
-                        for (WasteBin bin : binList) {
-
-                            double fill
-                                    = bin.getCurrentFill();
-
-                            String fillClass
-                                    = "green";
-
-                            if (fill >= 80) {
-
-                                fillClass = "red";
-
-                            } else if (fill >= 50) {
-
-                                fillClass = "yellow";
-                            }
-                %>
-
-
-                <!-- ================================================= -->
-                <!-- BIN CARD -->
-                <!-- ================================================= -->
-
-                <div class="card bin-card <%=fillClass%>"
-                     id="bin-<%=bin.getBinID()%>">
-
-                    <div class="card-title">
-
-                        <%=bin.getBinCode()%>
-
-                    </div>
-
-
-                    <div class="card-value bin-fill">
-
-                        <%=fill%>%
-
-                    </div>
-
-
-                    <!-- Progress Bar -->
-
-                    <div class="bin-bar-container">
-
-                        <div class="bin-bar"
-                             style="width: <%=fill%>%;">
+                            <div class="monitor-row">
+                                <span class="monitor-icon">↻</span>
+                                <div>
+                                    <strong>Collections</strong>
+                                    <small>Collection activities</small>
+                                </div>
+                                <b><%= totalCollections%></b>
+                            </div>
                         </div>
 
                     </div>
-
-
-                    <div class="bin-info">
-
-                        <p>
-                            Location:
-                            <%=bin.getLocation()%>
-                        </p>
-
-                        <p>
-                            Status:
-                            <strong>
-                                <%=bin.getStatus()%>
-                            </strong>
-                        </p>
-
-                    </div>
-
-
-                    <!-- View Details -->
-
-                    <a class="bin-detail-btn"
-                       href="<%=request.getContextPath()%>/wastebin/detail?binID=<%=bin.getBinID()%>">
-
-                        View Details
-
-                    </a>
-
-                </div>
-
-
-                <%
-                    }
-
-                } else {
-                %>
-
-
-                <div class="card">
-
-                    <div class="card-title">
-                        Waste Bins
-                    </div>
-
-                    <div class="card-value">
-                        No data
-                    </div>
-
-                </div>
-
-
-                <%
-                    }
-                %>
-
-            </div>
-
-
-            <!-- ================================================= -->
-            <!-- COLLECTION REQUEST -->
-            <!-- ================================================= -->
-
-            <h2 class="section-title">
-                Collection Requests
-            </h2>
-
-            <div class="cards">
-
-                <div class="card blue">
-
-                    <div class="card-title">
-                        Total Requests
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "totalRequests")%>
-                    </div>
-
-                </div>
-
-
-                <div class="card yellow">
-
-                    <div class="card-title">
-                        Pending
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "pendingRequests")%>
-                    </div>
-
-                </div>
-
-
-                <div class="card orange">
-
-                    <div class="card-title">
-                        In Progress
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "inProgressRequests")%>
-                    </div>
-
-                </div>
-
-
-                <div class="card green">
-
-                    <div class="card-title">
-                        Completed
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "completedRequests")%>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ================================================= -->
-            <!-- ALERT -->
-            <!-- ================================================= -->
-
-            <h2 class="section-title">
-                Alerts
-            </h2>
-
-            <div class="cards">
-
-                <div class="card blue">
-
-                    <div class="card-title">
-                        Total Alerts
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "totalAlerts")%>
-                    </div>
-
-                </div>
-
-
-                <div class="card red">
-
-                    <div class="card-title">
-                        Unresolved Alerts
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "unresolvedAlerts")%>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ================================================= -->
-            <!-- MAINTENANCE -->
-            <!-- ================================================= -->
-
-            <h2 class="section-title">
-                Maintenance
-            </h2>
-
-            <div class="maintenance-summary">
-
-                <div class="card blue">
-
-                    <div class="card-title">
-                        Total Maintenance
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "totalMaintenance")%>
-                    </div>
-
-                </div>
-
-
-                <div class="card yellow">
-
-                    <div class="card-title">
-                        Pending
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "pendingMaintenance")%>
-                    </div>
-
-                </div>
-
-
-                <div class="card orange">
-
-                    <div class="card-title">
-                        In Progress
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "inProgressMaintenance")%>
-                    </div>
-
-                </div>
-
-
-                <div class="card green">
-
-                    <div class="card-title">
-                        Completed
-                    </div>
-
-                    <div class="card-value">
-                        <%= request.getAttribute(
-                        "completedMaintenance")%>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ================================================= -->
-            <!-- MAINTENANCE BUTTON -->
-            <!-- ================================================= -->
-
-            <% if ("ADM".equals(currentRole)
-                || "MGR".equals(currentRole)
-                || "TEC".equals(currentRole)) {%>
-
-            <div style="margin-top: 15px;">
-
-                <a class="quick-btn btn-maintenance"
-                   style="display: inline-block;
-                   padding: 10px 18px;"
-                   href="<%=request.getContextPath()%>/maintenance">
-
-                    View Maintenance
-
-                </a>
-
-            </div>
-
-            <% }%>
-
-
+                </section>
+
+
+                <!-- STATS -->
+                <section class="stats-grid">
+
+                    <article class="stat-card">
+                        <div class="stat-icon green">▣</div>
+                        <div class="stat-content">
+                            <span>Total Waste Bins</span>
+                            <strong><%= totalBins%></strong>
+                            <small>Registered in system</small>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-icon blue">↻</div>
+                        <div class="stat-content">
+                            <span>Collections</span>
+                            <strong><%= totalCollections%></strong>
+                            <small>Collection records</small>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-icon orange">!</div>
+                        <div class="stat-content">
+                            <span>Active Alerts</span>
+                            <strong><%= totalAlerts%></strong>
+                            <small>Require attention</small>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-icon purple">⌖</div>
+                        <div class="stat-content">
+                            <span>Managed Areas</span>
+                            <strong><%= totalAreas%></strong>
+                            <small>Operational areas</small>
+                        </div>
+                    </article>
+
+                </section>
+
+
+                <!-- CONTENT GRID -->
+                <section class="content-grid">
+
+                    <!-- MAP -->
+                    <article class="panel map-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <span class="panel-kicker">LOCATION OVERVIEW</span>
+                                <h3>Smart City Map</h3>
+                            </div>
+
+                            <a href="<%= ctx%>/area" class="text-link">View areas →</a>
+                        </div>
+
+                        <div class="fake-map">
+
+                            <div class="map-road road-1"></div>
+                            <div class="map-road road-2"></div>
+                            <div class="map-road road-3"></div>
+                            <div class="map-road road-4"></div>
+
+                            <div class="map-block block-1"></div>
+                            <div class="map-block block-2"></div>
+                            <div class="map-block block-3"></div>
+                            <div class="map-block block-4"></div>
+
+                            <span class="map-pin pin-1">♻</span>
+                            <span class="map-pin pin-2">♻</span>
+                            <span class="map-pin pin-3">♻</span>
+                            <span class="map-pin pin-4">♻</span>
+
+                            <div class="map-label">
+                                <strong>Waste management areas</strong>
+                                <span>Interactive map can be connected here.</span>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- BIN OVERVIEW -->
+                    <article class="panel overview-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <span class="panel-kicker">STATUS</span>
+                                <h3>Bin Overview</h3>
+                            </div>
+
+                            <a href="<%= ctx%>/wastebin" class="text-link">View all →</a>
+                        </div>
+
+                        <div class="overview-body">
+
+                            <div class="status-ring">
+                                <div class="ring-inner">
+                                    <strong>—</strong>
+                                    <span>bins</span>
+                                </div>
+                            </div>
+
+                            <div class="status-list">
+
+                                <div class="status-item">
+                                    <span class="status-dot normal"></span>
+                                    <div>
+                                        <strong>Normal</strong>
+                                        <small>Operating normally</small>
+                                    </div>
+                                    <b>—</b>
+                                </div>
+
+                                <div class="status-item">
+                                    <span class="status-dot warning"></span>
+                                    <div>
+                                        <strong>Warning</strong>
+                                        <small>Needs monitoring</small>
+                                    </div>
+                                    <b>—</b>
+                                </div>
+
+                                <div class="status-item">
+                                    <span class="status-dot critical"></span>
+                                    <div>
+                                        <strong>Critical</strong>
+                                        <small>Needs attention</small>
+                                    </div>
+                                    <b>—</b>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </article>
+
+                </section>
+
+
+                <!-- BOTTOM GRID -->
+                <section class="bottom-grid">
+
+                    <!-- RECENT COLLECTION -->
+                    <article class="panel collection-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <span class="panel-kicker">OPERATIONS</span>
+                                <h3>Recent Collections</h3>
+                            </div>
+
+                            <a href="<%= ctx%>/collection" class="text-link">View all →</a>
+                        </div>
+
+                        <div class="empty-state">
+                            <div class="empty-icon">↻</div>
+                            <strong>Collection data will appear here</strong>
+                            <span>
+                                Connect this section to your existing CollectionServlet
+                                and DAO data.
+                            </span>
+                        </div>
+
+                    </article>
+
+
+                    <!-- QUICK ACTIONS -->
+                    <article class="panel quick-panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <span class="panel-kicker">SHORTCUTS</span>
+                                <h3>Quick Actions</h3>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions">
+
+                            <a href="<%= ctx%>/collection/create" class="quick-action">
+                                <span class="quick-icon green-bg">↻</span>
+                                <span>
+                                    <strong>New Collection</strong>
+                                    <small>Create a collection request</small>
+                                </span>
+                                <b>→</b>
+                            </a>
+
+                            <a href="<%= ctx%>/wastebin/create" class="quick-action">
+                                <span class="quick-icon blue-bg">▣</span>
+                                <span>
+                                    <strong>Add Waste Bin</strong>
+                                    <small>Register a new bin</small>
+                                </span>
+                                <b>→</b>
+                            </a>
+
+                            <a href="<%= ctx%>/area/create" class="quick-action">
+                                <span class="quick-icon orange-bg">⌖</span>
+                                <span>
+                                    <strong>Add Area</strong>
+                                    <small>Create a management area</small>
+                                </span>
+                                <b>→</b>
+                            </a>
+
+                        </div>
+
+                    </article>
+
+                </section>
+
+
+                <footer class="footer">
+                    <span>© SmartWaste Management System</span>
+                    <span>Smarter waste • Cleaner city</span>
+                </footer>
+
+            </main>
         </div>
 
-
-        <!-- ===================================================== -->
-        <!-- AUTO UPDATE BIN STATUS -->
-        <!-- ===================================================== -->
-
-        <script>
-
-            function updateBinStatus() {
-
-                fetch(
-                        '<%=request.getContextPath()%>/api/bin/status'
-                        )
-
-                        .then(response => response.json())
-
-                        .then(data => {
-
-                            data.forEach(bin => {
-
-                                const card =
-                                        document.getElementById(
-                                                'bin-' + bin.binID
-                                                );
-
-                                if (card) {
-
-                                    const fill =
-                                            card.querySelector(
-                                                    '.bin-fill'
-                                                    );
-
-                                    const bar =
-                                            card.querySelector(
-                                                    '.bin-bar'
-                                                    );
-
-                                    if (fill) {
-
-                                        fill.textContent =
-                                                bin.currentFill + '%';
-                                    }
-
-                                    if (bar) {
-
-                                        bar.style.width =
-                                                bin.currentFill + '%';
-                                    }
-
-                                }
-
-                            });
-
-                        })
-
-                        .catch(error => {
-
-                            console.log(
-                                    'Cannot update bin status:',
-                                    error
-                                    );
-
-                        });
-
-            }
-
-
-            // Update every 5 seconds
-
-            setInterval(
-                    updateBinStatus,
-                    5000
-                    );
-
-        </script>
-
     </body>
-
 </html>

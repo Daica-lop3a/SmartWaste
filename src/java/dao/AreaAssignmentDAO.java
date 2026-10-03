@@ -219,7 +219,7 @@ public class AreaAssignmentDAO {
                 + "AND aa.assignmentRole = 'STAFF' "
                 + "AND u.roleID = 'STF' "
                 + "AND u.status = 1 "
-                + "ORDER BY u.userID";
+                + "ORDER BY u.userID ASC";
 
         Connection cn = null;
         PreparedStatement ps = null;

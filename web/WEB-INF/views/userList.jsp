@@ -1,5 +1,4 @@
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-
 <%@page import="java.util.List"%>
 <%@page import="model.AppUser"%>
 
@@ -60,6 +59,7 @@
                 cursor: pointer;
                 background: #2563eb;
                 color: white;
+                font-size: 14px;
             }
 
             .btn-danger {
@@ -118,8 +118,20 @@
                 font-weight: bold;
             }
 
-            form {
-                display: inline;
+            /*
+             * Form dùng cho các nút Lock / Reset / Delete.
+             * Không để form chiếm cả một dòng.
+             */
+            .action-form {
+                display: inline-block;
+                margin: 0;
+            }
+
+            /*
+             * Cột Action không bị xuống dòng lung tung.
+             */
+            .action-cell {
+                white-space: nowrap;
             }
 
         </style>
@@ -129,7 +141,6 @@
     <body>
 
         <h1>User Management</h1>
-
 
         <div class="top-bar">
 
@@ -151,7 +162,6 @@
 
         </div>
 
-
         <% if (error != null) {%>
 
         <div class="error">
@@ -159,7 +169,6 @@
         </div>
 
         <% }%>
-
 
         <div class="search-box">
 
@@ -171,7 +180,6 @@
                        placeholder="Search user..."
                        value="<%=keyword != null ? keyword : ""%>">
 
-
                 <select name="roleId">
 
                     <option value="">
@@ -180,30 +188,29 @@
 
                     <option value="ADM"
                             <%="ADM".equals(roleId)
-                                    ? "selected" : ""%>>
+                                ? "selected" : ""%>>
                         Admin
                     </option>
 
                     <option value="MGR"
                             <%="MGR".equals(roleId)
-                                    ? "selected" : ""%>>
+                                ? "selected" : ""%>>
                         Manager
                     </option>
 
                     <option value="STF"
                             <%="STF".equals(roleId)
-                                    ? "selected" : ""%>>
+                                ? "selected" : ""%>>
                         Staff
                     </option>
 
                     <option value="TEC"
                             <%="TEC".equals(roleId)
-                                    ? "selected" : ""%>>
+                                ? "selected" : ""%>>
                         Technician
                     </option>
 
                 </select>
-
 
                 <button type="submit"
                         class="btn">
@@ -214,7 +221,6 @@
 
         </div>
 
-
         <table>
 
             <thead>
@@ -222,23 +228,16 @@
                 <tr>
 
                     <th>User ID</th>
-
                     <th>Full Name</th>
-
                     <th>Email</th>
-
                     <th>Phone</th>
-
                     <th>Role</th>
-
                     <th>Status</th>
-
                     <th>Action</th>
 
                 </tr>
 
             </thead>
-
 
             <tbody>
 
@@ -288,23 +287,23 @@
 
                     </td>
 
+                    <td class="action-cell">
 
-                    <td>
-
-                    <td>
-
+                        <!-- View -->
                         <a class="btn btn-secondary"
                            href="<%=request.getContextPath()%>/user/view?id=<%=user.getUserId()%>">
                             View
                         </a>
 
+                        <!-- Edit -->
                         <a class="btn"
                            href="<%=request.getContextPath()%>/user/edit?id=<%=user.getUserId()%>">
                             Edit
                         </a>
 
-
-                        <form action="<%=request.getContextPath()%>/user/lock"
+                        <!-- Lock / Unlock -->
+                        <form class="action-form"
+                              action="<%=request.getContextPath()%>/user/lock"
                               method="POST">
 
                             <input type="hidden"
@@ -322,8 +321,9 @@
 
                         </form>
 
-
-                        <form action="<%=request.getContextPath()%>/user/reset"
+                        <!-- Reset Password -->
+                        <form class="action-form"
+                              action="<%=request.getContextPath()%>/user/reset"
                               method="POST"
                               onsubmit="return confirm('Reset password for this user?');">
 
@@ -338,8 +338,9 @@
 
                         </form>
 
-
-                        <form action="<%=request.getContextPath()%>/user/delete"
+                        <!-- Delete -->
+                        <form class="action-form"
+                              action="<%=request.getContextPath()%>/user/delete"
                               method="POST"
                               onsubmit="return confirm('Are you sure you want to delete this user?');">
 
@@ -356,83 +357,30 @@
 
                     </td>
 
+                </tr>
 
-            <form action="<%=request.getContextPath()%>/user/lock"
-                  method="POST">
+                <%
+                    }
 
-                <input type="hidden"
-                       name="id"
-                       value="<%=user.getUserId()%>">
+                } else {
+                %>
 
-                <button type="submit"
-                        class="btn btn-warning">
+                <tr>
 
-                    <%=user.isStatus()
-                            ? "Lock"
-                            : "Unlock"%>
+                    <td colspan="7">
+                        No users found.
+                    </td>
 
-                </button>
+                </tr>
 
-            </form>
+                <%
+                    }
+                %>
 
+            </tbody>
 
-            <form action="<%=request.getContextPath()%>/user/reset"
-                  method="POST"
-                  onsubmit="return confirm('Reset password for this user?');">
+        </table>
 
-                <input type="hidden"
-                       name="id"
-                       value="<%=user.getUserId()%>">
+    </body>
 
-                <button type="submit"
-                        class="btn">
-                    Reset
-                </button>
-
-            </form>
-
-
-            <form action="<%=request.getContextPath()%>/user/delete"
-                  method="POST"
-                  onsubmit="return confirm('Are you sure you want to delete this user?');">
-
-                <input type="hidden"
-                       name="id"
-                       value="<%=user.getUserId()%>">
-
-                <button type="submit"
-                        class="btn btn-danger">
-                    Delete
-                </button>
-
-            </form>
-
-        </td>
-
-    </tr>
-
-    <%
-        }
-
-    } else {
-    %>
-
-    <tr>
-
-        <td colspan="7">
-            No users found.
-        </td>
-
-    </tr>
-
-    <%
-        }
-    %>
-
-</tbody>
-
-</table>
-
-</body>
-
-</html>
+</html>S
