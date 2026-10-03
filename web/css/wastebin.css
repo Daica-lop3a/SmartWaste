@@ -14,7 +14,7 @@
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.14em;
-    color: var(--primary);
+    color: var(--green);
 }
 
 .page-intro h2 {
@@ -83,7 +83,7 @@
     padding: 18px;
     border: 1px solid var(--border);
     border-radius: 18px;
-    background: var(--surface);
+    background: var(--white);
     box-shadow: var(--shadow);
 }
 
@@ -100,8 +100,8 @@
 }
 
 .summary-icon-total {
-    background: #eaf7ef;
-    color: var(--primary);
+    background: var(--green-soft);
+    color: var(--green);
 }
 
 .summary-icon-active {
@@ -137,7 +137,7 @@
 .record-count {
     padding: 7px 11px;
     border-radius: 999px;
-    background: var(--surface-soft);
+    background: var(--green-pale);
     color: var(--muted);
     font-size: 12px;
     font-weight: 700;
@@ -213,7 +213,7 @@
 }
 
 .location-icon {
-    color: var(--primary);
+    color: var(--green);
     font-size: 16px;
 }
 
@@ -388,8 +388,8 @@
     height: 58px;
     margin-bottom: 14px;
     border-radius: 18px;
-    background: #eef5f1;
-    color: var(--primary);
+    background: var(--green-pale);
+    color: var(--green);
     font-size: 24px;
 }
 

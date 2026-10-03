@@ -41,6 +41,7 @@ public class AreaServlet extends HttpServlet {
             showForm(request, response, null);
             return;
         }
+
         if ("/view".equals(path)) {
 
             String areaId = request.getParameter("id");
@@ -51,6 +52,7 @@ public class AreaServlet extends HttpServlet {
                 );
                 return;
             }
+
             if (!canAccessArea(request, areaId)) {
                 request.setAttribute(
                         "ERROR",
@@ -81,6 +83,7 @@ public class AreaServlet extends HttpServlet {
 
             return;
         }
+
         if ("/edit".equals(path)) {
 
             String areaId = request.getParameter("id");
@@ -117,6 +120,7 @@ public class AreaServlet extends HttpServlet {
             showForm(request, response, area);
             return;
         }
+
         showList(request, response);
     }
 
@@ -154,20 +158,49 @@ public class AreaServlet extends HttpServlet {
 
         String role = user.getRoleId();
 
+        String search = request.getParameter("search");
+        String sort = request.getParameter("sort");
+        String order = request.getParameter("order");
+
+        if (search == null) {
+            search = "";
+        }
+
+        if (sort == null || sort.isEmpty()) {
+            sort = "areaId";
+        }
+
+        if (order == null || order.isEmpty()) {
+            order = "ASC";
+        }
+
         if ("MGR".equals(role)) {
 
             request.setAttribute(
                     "LIST_AREA",
-                    areas.getByManager(user.getUserId())
+                    areas.getFilteredByManager(
+                            user.getUserId(),
+                            search,
+                            sort,
+                            order
+                    )
             );
 
         } else {
 
             request.setAttribute(
                     "LIST_AREA",
-                    areas.getAll()
+                    areas.getFiltered(
+                            search,
+                            sort,
+                            order
+                    )
             );
         }
+
+        request.setAttribute("SEARCH", search);
+        request.setAttribute("SORT", sort);
+        request.setAttribute("ORDER", order);
 
         request.getRequestDispatcher(AREA_LIST)
                 .forward(request, response);
@@ -345,12 +378,10 @@ public class AreaServlet extends HttpServlet {
 
         String role = user.getRoleId();
 
-        // Admin được truy cập tất cả Area
         if ("ADM".equals(role)) {
             return true;
         }
 
-        // Manager chỉ được truy cập Area mình quản lý
         if ("MGR".equals(role)) {
             return assignments.isManagerOfArea(
                     user.getUserId(),
@@ -358,7 +389,6 @@ public class AreaServlet extends HttpServlet {
             );
         }
 
-        // Staff và Technician vẫn được xem Area
         if ("STF".equals(role) || "TEC".equals(role)) {
             return true;
         }

@@ -15,14 +15,14 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/wastebin/*")
 public class WasteBinServlet extends HttpServlet {
 
-    private static final String BIN_LIST =
-            "/WEB-INF/views/wasteBinList.jsp";
+    private static final String BIN_LIST
+            = "/WEB-INF/views/wasteBinList.jsp";
 
-    private static final String BIN_FORM =
-            "/WEB-INF/views/wasteBinForm.jsp";
+    private static final String BIN_FORM
+            = "/WEB-INF/views/wasteBinForm.jsp";
 
-    private static final String BIN_DETAIL =
-            "/WEB-INF/views/binDetail.jsp";
+    private static final String BIN_DETAIL
+            = "/WEB-INF/views/binDetail.jsp";
 
     private final WasteBinDAO bins = new WasteBinDAO();
     private final AreaDAO areas = new AreaDAO();
@@ -143,10 +143,60 @@ public class WasteBinServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        String search = request.getParameter("search");
+        String areaID = request.getParameter("areaID");
+        String status = request.getParameter("status");
+        String fillLevel = request.getParameter("fillLevel");
+        String sort = request.getParameter("sort");
+        String order = request.getParameter("order");
+
+        if (search == null) {
+            search = "";
+        }
+
+        if (areaID == null) {
+            areaID = "";
+        }
+
+        if (status == null) {
+            status = "";
+        }
+
+        if (fillLevel == null) {
+            fillLevel = "";
+        }
+
+        if (sort == null || sort.isEmpty()) {
+            sort = "binID";
+        }
+
+        if (order == null || order.isEmpty()) {
+            order = "ASC";
+        }
+
         request.setAttribute(
                 "LIST_BIN",
-                bins.getAll()
+                bins.getFiltered(
+                        search,
+                        areaID,
+                        status,
+                        fillLevel,
+                        sort,
+                        order
+                )
         );
+
+        request.setAttribute(
+                "LIST_AREA",
+                areas.getAll()
+        );
+
+        request.setAttribute("SEARCH", search);
+        request.setAttribute("AREA_ID", areaID);
+        request.setAttribute("STATUS", status);
+        request.setAttribute("FILL_LEVEL", fillLevel);
+        request.setAttribute("SORT", sort);
+        request.setAttribute("ORDER", order);
 
         request.getRequestDispatcher(BIN_LIST)
                 .forward(request, response);
@@ -199,7 +249,7 @@ public class WasteBinServlet extends HttpServlet {
             areaID = areaID.trim();
         }
 
-        // BIN ID
+        // Kiem tra BIN ID
         if (binID == null || binID.isEmpty()) {
 
             request.setAttribute(
@@ -221,7 +271,7 @@ public class WasteBinServlet extends HttpServlet {
             return;
         }
 
-        // BIN CODE
+        // Kiem tra BIN CODE
         if (binCode == null || binCode.isEmpty()) {
 
             request.setAttribute(
@@ -243,7 +293,7 @@ public class WasteBinServlet extends HttpServlet {
             return;
         }
 
-        // CAPACITY
+        // Kiem tra CAPACITY
         double capacity;
 
         try {
@@ -292,7 +342,7 @@ public class WasteBinServlet extends HttpServlet {
             return;
         }
 
-        // AREA
+        // Kiem tra AREA
         if (areaID == null || areaID.isEmpty()) {
 
             request.setAttribute(
@@ -341,7 +391,7 @@ public class WasteBinServlet extends HttpServlet {
 
         boolean success;
 
-        // CREATE
+        // Tao moi
         if (oldBin == null) {
 
             WasteBin bin = new WasteBin();
@@ -351,7 +401,7 @@ public class WasteBinServlet extends HttpServlet {
             bin.setLocation(location);
             bin.setCapacity(capacity);
 
-            // Sensor will update this value later
+            // Sensor se cap nhat gia tri nay sau
             bin.setCurrentFill(0);
 
             bin.setStatus(status);
@@ -361,13 +411,12 @@ public class WasteBinServlet extends HttpServlet {
 
         } else {
 
-            // UPDATE
-
+            // Cap nhat
             oldBin.setBinCode(binCode);
             oldBin.setLocation(location);
             oldBin.setCapacity(capacity);
 
-            // DO NOT change currentFill manually
+            // Khong thay doi currentFill thu cong
             oldBin.setStatus(status);
             oldBin.setAreaID(areaID);
 
@@ -443,9 +492,8 @@ public class WasteBinServlet extends HttpServlet {
         }
 
         /*
-         * Current Fill is controlled by sensor.
-         * Therefore, when validation fails,
-         * we don't take currentFill from the form.
+         * Current Fill duoc dieu khien boi sensor.
+         * Khi validation loi, khong lay currentFill tu form.
          */
         bin.setCurrentFill(0);
 

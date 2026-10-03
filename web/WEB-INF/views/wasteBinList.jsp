@@ -1,14 +1,60 @@
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="java.util.List"%>
 <%@page import="model.WasteBin"%>
+<%@page import="model.Area"%>
 <%@page import="model.AppUser"%>
 
 <%
     List<WasteBin> list
             = (List<WasteBin>) request.getAttribute("LIST_BIN");
 
+    List<Area> areaList
+            = (List<Area>) request.getAttribute("LIST_AREA");
+
     String error
             = (String) request.getAttribute("ERROR");
+
+    String search
+            = (String) request.getAttribute("SEARCH");
+
+    String selectedArea
+            = (String) request.getAttribute("AREA_ID");
+
+    String selectedStatus
+            = (String) request.getAttribute("STATUS");
+
+    String selectedFillLevel
+            = (String) request.getAttribute("FILL_LEVEL");
+
+    String selectedSort
+            = (String) request.getAttribute("SORT");
+
+    String selectedOrder
+            = (String) request.getAttribute("ORDER");
+
+    if (search == null) {
+        search = "";
+    }
+
+    if (selectedArea == null) {
+        selectedArea = "";
+    }
+
+    if (selectedStatus == null) {
+        selectedStatus = "";
+    }
+
+    if (selectedFillLevel == null) {
+        selectedFillLevel = "";
+    }
+
+    if (selectedSort == null) {
+        selectedSort = "binID";
+    }
+
+    if (selectedOrder == null) {
+        selectedOrder = "ASC";
+    }
 
     AppUser currentUser
             = (AppUser) session.getAttribute("user");
@@ -343,6 +389,250 @@
                 </section>
 
 
+                <!-- Bo loc -->
+                <section class="panel bin-filter-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <span class="panel-kicker">
+                                FILTER & SORT
+                            </span>
+
+                            <h3>
+                                Waste Bin Filters
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                    <form method="GET"
+                          action="<%=request.getContextPath()%>/wastebin"
+                          class="bin-filter-form">
+
+                        <div class="filter-field">
+
+                            <label for="search">
+                                Search
+                            </label>
+
+                            <input type="text"
+                                   id="search"
+                                   name="search"
+                                   value="<%=search%>"
+                                   placeholder="Bin Code / Location">
+
+                        </div>
+
+
+                        <div class="filter-field">
+
+                            <label for="areaID">
+                                Area
+                            </label>
+
+                            <select id="areaID"
+                                    name="areaID">
+
+                                <option value="">
+                                    All
+                                </option>
+
+                                <%
+                                    if (areaList != null) {
+
+                                        for (Area area : areaList) {
+
+                                            boolean selected
+                                                    = area.getAreaId() != null
+                                                    && area.getAreaId().equals(selectedArea);
+                                %>
+
+                                <option value="<%=area.getAreaId()%>"
+                                        <%=selected ? "selected" : ""%>>
+
+                                    <%=area.getAreaName()%>
+
+                                </option>
+
+                                <%
+                                        }
+                                    }
+                                %>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="filter-field">
+
+                            <label for="status">
+                                Status
+                            </label>
+
+                            <select id="status"
+                                    name="status">
+
+                                <option value=""
+                                        <%=selectedStatus.isEmpty() ? "selected" : ""%>>
+                                    All
+                                </option>
+
+                                <option value="Active"
+                                        <%= "Active".equalsIgnoreCase(selectedStatus)
+                                                ? "selected"
+                                                : ""%>>
+                                    Active
+                                </option>
+
+                                <option value="Full"
+                                        <%= "Full".equalsIgnoreCase(selectedStatus)
+                                                ? "selected"
+                                                : ""%>>
+                                    Full
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="filter-field">
+
+                            <label for="fillLevel">
+                                Fill Level
+                            </label>
+
+                            <select id="fillLevel"
+                                    name="fillLevel">
+
+                                <option value=""
+                                        <%=selectedFillLevel.isEmpty() ? "selected" : ""%>>
+                                    All
+                                </option>
+
+                                <option value="Low"
+                                        <%= "Low".equalsIgnoreCase(selectedFillLevel)
+                                                ? "selected"
+                                                : ""%>>
+                                    Low
+                                </option>
+
+                                <option value="Medium"
+                                        <%= "Medium".equalsIgnoreCase(selectedFillLevel)
+                                                ? "selected"
+                                                : ""%>>
+                                    Medium
+                                </option>
+
+                                <option value="High"
+                                        <%= "High".equalsIgnoreCase(selectedFillLevel)
+                                                ? "selected"
+                                                : ""%>>
+                                    High
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="filter-field">
+
+                            <label for="sort">
+                                Sort by
+                            </label>
+
+                            <select id="sort"
+                                    name="sort">
+
+                                <option value="binID"
+                                        <%= "binID".equals(selectedSort)
+                                                ? "selected"
+                                                : ""%>>
+                                    Bin ID
+                                </option>
+
+                                <option value="binCode"
+                                        <%= "binCode".equals(selectedSort)
+                                                ? "selected"
+                                                : ""%>>
+                                    Bin Code
+                                </option>
+
+                                <option value="capacity"
+                                        <%= "capacity".equals(selectedSort)
+                                                ? "selected"
+                                                : ""%>>
+                                    Capacity
+                                </option>
+
+                                <option value="currentFill"
+                                        <%= "currentFill".equals(selectedSort)
+                                                ? "selected"
+                                                : ""%>>
+                                    Current Fill
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="filter-field">
+
+                            <label for="order">
+                                Order
+                            </label>
+
+                            <select id="order"
+                                    name="order">
+
+                                <option value="ASC"
+                                        <%= "ASC".equalsIgnoreCase(selectedOrder)
+                                                ? "selected"
+                                                : ""%>>
+                                    ASC
+                                </option>
+
+                                <option value="DESC"
+                                        <%= "DESC".equalsIgnoreCase(selectedOrder)
+                                                ? "selected"
+                                                : ""%>>
+                                    DESC
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="filter-actions">
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                Apply Filter
+
+                            </button>
+
+                            <a href="<%=request.getContextPath()%>/wastebin"
+                               class="btn btn-light">
+
+                                Reset
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </section>
+
+
                 <!-- Waste Bin table -->
                 <section class="panel bin-panel">
 
@@ -410,7 +700,7 @@
 
                                             String fillClass = "fill-green";
 
-                                            String fillLabel = "Normal";
+                                            String fillLabel = "Low";
 
                                             if (fill >= 80) {
 
@@ -488,7 +778,6 @@
 
                                                 <div class="fill-progress <%=fillClass%>"
                                                      style="width: <%=Math.min(fill, 100)%>%;">
-
                                                 </div>
 
                                             </div>

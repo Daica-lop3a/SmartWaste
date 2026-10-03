@@ -329,4 +329,153 @@ public class WasteBinDAO {
             DBContext.close(ps, cn);
         }
     }
+
+    public List<WasteBin> getFiltered(
+            String search,
+            String areaID,
+            String status,
+            String fillLevel,
+            String sort,
+            String order) {
+
+        List<WasteBin> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder();
+
+        sql.append("SELECT binID, binCode, location, capacity, ");
+        sql.append("currentFill, status, areaID ");
+        sql.append("FROM tblWasteBins ");
+        sql.append("WHERE 1 = 1 ");
+
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+
+            sql.append("AND (binCode LIKE ? OR location LIKE ?) ");
+
+            String keyword = "%" + search.trim() + "%";
+
+            params.add(keyword);
+            params.add(keyword);
+        }
+
+        if (areaID != null && !areaID.trim().isEmpty()) {
+
+            sql.append("AND areaID = ? ");
+
+            params.add(areaID.trim());
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+
+            sql.append("AND status = ? ");
+
+            params.add(status.trim());
+        }
+
+        if ("Low".equals(fillLevel)) {
+
+            sql.append("AND currentFill < 50 ");
+
+        } else if ("Medium".equals(fillLevel)) {
+
+            sql.append("AND currentFill >= 50 ");
+            sql.append("AND currentFill < 80 ");
+
+        } else if ("High".equals(fillLevel)) {
+
+            sql.append("AND currentFill >= 80 ");
+        }
+
+        String orderBy;
+
+        if ("binCode".equals(sort)) {
+
+            orderBy = "binCode";
+
+        } else if ("capacity".equals(sort)) {
+
+            orderBy = "capacity";
+
+        } else if ("currentFill".equals(sort)) {
+
+            orderBy = "currentFill";
+
+        } else {
+
+            orderBy = "binID";
+        }
+
+        String sortOrder;
+
+        if ("DESC".equalsIgnoreCase(order)) {
+
+            sortOrder = "DESC";
+
+        } else {
+
+            sortOrder = "ASC";
+        }
+
+        sql.append("ORDER BY ")
+                .append(orderBy)
+                .append(" ")
+                .append(sortOrder);
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            conn = DBContext.getConnection();
+
+            ps = conn.prepareStatement(sql.toString());
+
+            for (int i = 0; i < params.size(); i++) {
+
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                WasteBin bin = new WasteBin();
+
+                bin.setBinID(
+                        rs.getString("binID"));
+
+                bin.setBinCode(
+                        rs.getString("binCode"));
+
+                bin.setLocation(
+                        rs.getString("location"));
+
+                bin.setCapacity(
+                        rs.getDouble("capacity"));
+
+                bin.setCurrentFill(
+                        rs.getDouble("currentFill"));
+
+                bin.setStatus(
+                        rs.getString("status"));
+
+                bin.setAreaID(
+                        rs.getString("areaID"));
+
+                list.add(bin);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            DBContext.close(rs, ps, conn);
+        }
+
+        return list;
+    }
 }
